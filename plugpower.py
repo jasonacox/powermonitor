@@ -7,8 +7,8 @@ from time import sleep
 import datetime
 
 # Device Info - EDIT THIS
-DEVICEID="03200160dc4f2216f984"
-DEVICEIP="10.0.1.5"
+DEVICEID="01234567891234567890"
+DEVICEIP="10.1.1.1"
 
 # how my times to try to probe plug before giving up
 RETRY=5
