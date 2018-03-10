@@ -17,6 +17,7 @@ import socket
 import sys
 import time
 
+#logging.basicConfig(filename='pytuya.log',level=logging.DEBUG)
 
 try:
     #raise ImportError
@@ -128,7 +129,7 @@ class XenonDevice(object):
     def __init__(self, dev_id, address, local_key=None, dev_type=None, connection_timeout=10):
         """
         Represents a Tuya device.
-        
+
         Args:
             dev_id (str): The device id.
             address (str): The network address.
@@ -136,7 +137,7 @@ class XenonDevice(object):
             dev_type (str, optional): The device type.
                 It will be used as key for lookups in payload_dict.
                 Defaults to None.
-            
+
         Attributes:
             port (int): The port to connect to.
         """
@@ -155,7 +156,7 @@ class XenonDevice(object):
     def _send_receive(self, payload):
         """
         Send single buffer `payload` and receive a single buffer.
-        
+
         Args:
             payload(bytes): Data to send.
         """
@@ -229,8 +230,8 @@ class XenonDevice(object):
         #print('postfix_payload %r' % hex(len(postfix_payload)))
         assert len(postfix_payload) <= 0xff
         postfix_payload_hex_len = '%x' % len(postfix_payload)  # TODO this assumes a single byte 0-255 (0x00-0xff)
-        buffer = hex2bin( payload_dict[self.dev_type]['prefix'] + 
-                          payload_dict[self.dev_type][command]['hexByte'] + 
+        buffer = hex2bin( payload_dict[self.dev_type]['prefix'] +
+                          payload_dict[self.dev_type][command]['hexByte'] +
                           '000000' +
                           postfix_payload_hex_len ) + postfix_payload
         #print('command', command)
@@ -281,7 +282,7 @@ class OutletDevice(XenonDevice):
     def set_status(self, on, switch=1):
         """
         Set status of the device to 'on' or 'off'.
-        
+
         Args:
             on(bool):  True for 'on', False for 'off'.
             switch(int): The switch to set
@@ -300,7 +301,7 @@ class OutletDevice(XenonDevice):
     def set_timer(self, num_secs):
         """
         Set a timer.
-        
+
         Args:
             num_secs(int): Number of seconds
         """
