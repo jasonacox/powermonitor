@@ -27,9 +27,16 @@ def deviceInfo( deviceid, ip ):
                 print('Dictionary %r' % data)
                 print('Switch On: %r' % data['dps']['1'])
                 if '5' in data['dps'].keys():
-                    print('Power (W): %f' % (float(data['dps']['5'])/10.0))
-                    print('Current (mA): %f' % float(data['dps']['4']))
-                    print('Voltage (V): %f' % (float(data['dps']['6'])/10.0))
+                    w = (float(data['dps']['5'])/10.0)
+                    mA = float(data['dps']['4'])
+                    V = (float(data['dps']['6'])/10.0)
+                    day = (w/1000.0)*24
+                    week = 7.0 * day
+                    month = (week * 52.0)/12.0
+                    print('Power (W): %f' % w)
+                    print('Current (mA): %f' % mA)
+                    print('Voltage (V): %f' % V)
+                    print('Projected usage (kWh):  Day: %f  Week: %f  Month: %f' % (day, week, month))
                     return(float(data['dps']['5'])/10.0)
                 else:
                     return(0.0)
