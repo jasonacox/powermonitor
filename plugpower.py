@@ -5,10 +5,14 @@
 import pytuya
 from time import sleep
 import datetime
+import os
 
 # Device Info - EDIT THIS
 DEVICEID="01234567891234567890"
 DEVICEIP="10.1.1.1"
+
+PLUGID=os.getenv('PLUGID', DEVICEID)
+PLUGIP=os.getenv('PLUGIP', DEVICEIP)
 
 # how my times to try to probe plug before giving up
 RETRY=5
@@ -41,8 +45,8 @@ def deviceInfo( deviceid, ip ):
                 return(0.0)
             sleep(2)
 
-print("Polling Device %s at %s" % (DEVICEID,DEVICEIP))
+print("Polling Device %s at %s" % (PLUGID,PLUGIP))
 
-devicepower = deviceInfo(DEVICEID,DEVICEIP)
+devicepower = deviceInfo(PLUGID,PLUGIP)
 
 
