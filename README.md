@@ -8,7 +8,7 @@ Instructions for Capatible Smart Plugs
 To monitor a smart plug, you will need to know its IP address and Device ID.
 
 ## Setup
-1. Download the Smart Life - Smart Living app for iPHone or Android. Pair with your smart plug (this is important as you cannot monitor a plug that has not been paired).  
+1. Download the Smart Life - Smart Living app for iPhone or Android. Pair with your smart plug (this is important as you cannot monitor a plug that has not been paired).  
 	* https://itunes.apple.com/us/app/smart-life-smart-living/id1115101477?mt=8
 	* https://play.google.com/store/apps/details?id=com.tuya.smartlife&hl=en
 2. Device ID - Inside the app, select the plug you wish to monitor, select the three dot top right and "Device Info".  The page should display "Device ID" which the script will use to poll the plug.
