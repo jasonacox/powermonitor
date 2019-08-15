@@ -38,6 +38,20 @@ pip install Crypto
 pip install pyaes
 ```
 
+## Example Output
+```
+$ docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.99" powermonitor
+
+Polling Device 01234567891234567890 at 10.0.1.99
+Dictionary {'devId': '01234567891234567890', 'dps': {'1': True, '2': 0, '4': 69, '5': 12, '6': 1181}}
+Switch On: True
+Power (W): 1.200000
+Current (mA): 69.000000
+Voltage (V): 118.100000
+Projected usage (kWh):  Day: 0.028800  Week: 0.201600  Month: 0.873600
+
+```
+
 ## Example Products 
 * TanTan Smart Plug Mini Wi-Fi Enabled Outlet with Energy Monitoring - https://www.amazon.com/gp/product/B075Z17987/ref=oh_aui_detailpage_o03_s00?ie=UTF8&psc=1
 * SKYROKU SM-PW701U Wi-Fi Plug Smart Plug - see https://wikidevi.com/wiki/Xenon_SM-PW701U
