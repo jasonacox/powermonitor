@@ -15,7 +15,7 @@ To monitor a smart plug, you will need to know its IP address and Device ID.
 3. IP Address - You will need to determine what IP address your network assigned to the Smart Plug - this is more difficult but tooks like `arp-scan` can help identify devices on your network.  WiFi Routers often have a list of devices connected as well.  Look for devices with a name like "ESP_xxxxxx".
 
 ## Run
-You can use the following to pull and run the powermonitor docker container using the following command.  You will need to replace the enviroinmental values to your devices IP and ID values.
+You can use the following command to pull and run the powermonitor docker container.  You will need to replace the enviroinmental values to your device's IP and ID values.
 
 ```
 # run powermonitor container - replace with device ID and IP 
