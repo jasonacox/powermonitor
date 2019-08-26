@@ -14,6 +14,16 @@ To monitor a smart plug, you will need to know its IP address and Device ID.
 2. Device ID - Inside the app, select the plug you wish to monitor, select the three dot top right and "Device Info".  The page should display "Device ID" which the script will use to poll the plug.
 3. IP Address - You will need to determine what IP address your network assigned to the Smart Plug - this is more difficult but tooks like `arp-scan` can help identify devices on your network.  WiFi Routers often have a list of devices connected as well.  Look for devices with a name like "ESP_xxxxxx".
 
+## Run
+You can use the following to pull and run the powermonitor docker container using the following command.  You will need to replace the enviroinmental values to your devices IP and ID values.
+
+```
+# run powermonitor container - replace with device ID and IP 
+docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" jasonacox/powermonitor
+```
+
+Docker Hub: https://hub.docker.com/r/jasonacox/powermonitor
+
 ## Build and Run
 
 **OPTION 1**: Build a docker container using `Dockerfile`
@@ -40,7 +50,7 @@ pip install pyaes
 
 ## Example Output
 ```
-$ docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.99" powermonitor
+$ docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.99" jasonacox/powermonitor
 
 Polling Device 01234567891234567890 at 10.0.1.99
 Dictionary {'devId': '01234567891234567890', 'dps': {'1': True, '2': 0, '4': 69, '5': 12, '6': 1181}}
