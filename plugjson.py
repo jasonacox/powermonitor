@@ -5,7 +5,9 @@
 import pytuya
 from time import sleep
 import datetime
+import time
 import os
+
 
 # Device Info - EDIT THIS
 DEVICEID="01234567891234567890"
@@ -21,6 +23,8 @@ RETRY=5
 
 def deviceInfo( deviceid, ip, key ):
     watchdog = 0
+    now = datetime.datetime.utcnow()
+    iso_time = now.strftime("%Y-%m-%dT%H:%M:%SZ") 
     while True:
         try:
             d = pytuya.OutletDevice(deviceid, ip, key)
@@ -31,7 +35,7 @@ def deviceInfo( deviceid, ip, key ):
                     w = (float(data['dps']['5'])/10.0)
                     mA = float(data['dps']['4'])
                     V = (float(data['dps']['6'])/10.0)
-                    ret = "{ \"switch\": \"%s\", \"power\": \"%s\", \"current\": \"%s\", \"voltage\": \"%s\" }" % (sw, w, mA, V)
+                    ret = "{ \"datetime\": \"%s\", \"switch\": \"%s\", \"power\": \"%s\", \"current\": \"%s\", \"voltage\": \"%s\" }" % (iso_time, sw, w, mA, V)
                     return(ret)
                 else:
                     ret = "{ \"switch\": \"%s\" }" % sw
