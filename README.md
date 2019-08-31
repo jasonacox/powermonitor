@@ -60,6 +60,19 @@ Current (mA): 69.000000
 Voltage (V): 118.100000
 Projected usage (kWh):  Day: 0.028800  Week: 0.201600  Month: 0.873600
 
+$ bash test.sh 
+JSON Output - plugjson.py:
+{ "switch": "True", "power": "1.3", "current": "70.0", "voltage": "122.0" }
+
+TEXT Output - plugpower.py:
+Polling Device 01234567891234567890 at 10.0.1.99 with key 0123456789abcde1
+Dictionary {u'devId': u'01234567891234567890', u'dps': {u'1': True, u'2': 0, u'5': 13, u'4': 70, u'6': 1220}}
+Switch On: True
+Power (W): 1.300000
+Current (mA): 70.000000
+Voltage (V): 122.000000
+Projected usage (kWh):  Day: 0.031200  Week: 0.218400  Month: 0.946400
+
 ```
 
 ## Example Products 
