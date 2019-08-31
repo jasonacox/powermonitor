@@ -47,6 +47,8 @@ pip install pycrypto
 pip install Crypto
 pip install pyaes
 ```
+## JSON Output Script
+The `plugjson.py` script works the same as `plugpower.py` but produces the data in JSON output with a datetime stamp.  This makes it easier to feed into other systems for recording, alerting or graphing.
 
 ## Example Output
 ```
@@ -62,7 +64,7 @@ Projected usage (kWh):  Day: 0.028800  Week: 0.201600  Month: 0.873600
 
 $ bash test.sh 
 JSON Output - plugjson.py:
-{ "switch": "True", "power": "1.3", "current": "70.0", "voltage": "122.0" }
+{ "datetime": "2019-08-31T07:20:59Z", "switch": "True", "power": "1.2", "current": "70.0", "voltage": "122.1" }
 
 TEXT Output - plugpower.py:
 Polling Device 01234567891234567890 at 10.0.1.99 with key 0123456789abcde1
