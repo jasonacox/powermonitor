@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Power Probe - Wattage of smartplugs - JSON Output
+# Power Probe - Wattage of smartplugs - Text Output
 
 import pytuya
 from time import sleep
