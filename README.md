@@ -32,7 +32,7 @@ Docker Hub: https://hub.docker.com/r/jasonacox/powermonitor
 docker build -t powermonitor .
 
 # run powermonitor container - replace with device ID and IP 
-docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" powermonitor
+docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="0123456789abcdef" powermonitor
 ```
 
 **OPTION 2**: Manually install required python libraries:  
@@ -50,9 +50,9 @@ pip install pyaes
 
 ## Example Output
 ```
-$ docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.99" jasonacox/powermonitor
+$ docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.99" -e PLUGKEY="0123456789abcdef" jasonacox/powermonitor
 
-Polling Device 01234567891234567890 at 10.0.1.99
+Polling Device 01234567891234567890 at 10.0.1.99 with key 0123456789abcde1
 Dictionary {'devId': '01234567891234567890', 'dps': {'1': True, '2': 0, '4': 69, '5': 12, '6': 1181}}
 Switch On: True
 Power (W): 1.200000

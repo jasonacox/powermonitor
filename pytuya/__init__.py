@@ -16,8 +16,8 @@ import logging
 import socket
 import sys
 import time
-
-#logging.basicConfig(filename='pytuya.log',level=logging.DEBUG)
+import colorsys
+import binascii
 
 try:
     #raise ImportError
@@ -28,21 +28,28 @@ except ImportError:
     import pyaes  # https://github.com/ricmoo/pyaes
 
 
+version_tuple = (7, 0, 4)
+version = version_string = __version__ = '%d.%d.%d' % version_tuple
+__author__ = 'clach04'
+
 log = logging.getLogger(__name__)
-logging.basicConfig()  # TODO include function name/line numbers in log
+#logging.basicConfig()  # TODO include function name/line numbers in log
 #log.setLevel(level=logging.DEBUG)  # Debug hack!
 
-log.debug('Python %s on %s', sys.version, sys.platform)
+log.info('%s version %s', __name__, version)
+log.info('Python %s on %s', sys.version, sys.platform)
 if Crypto is None:
-    log.debug('Using pyaes version %r', pyaes.VERSION)
-    log.debug('Using pyaes from %r', pyaes.__file__)
+    log.info('Using pyaes version %r', pyaes.VERSION)
+    log.info('Using pyaes from %r', pyaes.__file__)
 else:
-    log.debug('Using PyCrypto %r', Crypto.version_info)
-    log.debug('Using PyCrypto from %r', Crypto.__file__)
+    log.info('Using PyCrypto %r', Crypto.version_info)
+    log.info('Using PyCrypto from %r', Crypto.__file__)
 
 SET = 'set'
+STATUS = 'status'
 
-PROTOCOL_VERSION_BYTES = b'3.1'
+PROTOCOL_VERSION_BYTES_31 = b'3.1'
+PROTOCOL_VERSION_BYTES_33 = b'3.3'
 
 IS_PY2 = sys.version_info[0] == 2
 
@@ -51,7 +58,7 @@ class AESCipher(object):
         #self.bs = 32  # 32 work fines for ON, does not work for OFF. Padding different compared to js version https://github.com/codetheweb/tuyapi/
         self.bs = 16
         self.key = key
-    def encrypt(self, raw):
+    def encrypt(self, raw, use_base64 = True):
         if Crypto:
             raw = self._pad(raw)
             cipher = AES.new(self.key, mode=AES.MODE_ECB)
@@ -63,11 +70,14 @@ class AESCipher(object):
             crypted_text += cipher.feed()  # flush final block
         #print('crypted_text %r' % crypted_text)
         #print('crypted_text (%d) %r' % (len(crypted_text), crypted_text))
-        crypted_text_b64 = base64.b64encode(crypted_text)
-        #print('crypted_text_b64 (%d) %r' % (len(crypted_text_b64), crypted_text_b64))
-        return crypted_text_b64
-    def decrypt(self, enc):
-        enc = base64.b64decode(enc)
+        if use_base64:
+            return base64.b64encode(crypted_text)
+        else:
+            return crypted_text
+            
+    def decrypt(self, enc, use_base64=True):
+        if use_base64:
+            enc = base64.b64decode(enc)
         #print('enc (%d) %r' % (len(enc), enc))
         #enc = self._unpad(enc)
         #enc = self._pad(enc)
@@ -111,7 +121,7 @@ def hex2bin(x):
 
 # This is intended to match requests.json payload at https://github.com/codetheweb/tuyapi
 payload_dict = {
-  "outlet": {
+  "device": {
     "status": {
       "hexByte": "0a",
       "command": {"gwId": "", "devId": ""}
@@ -129,7 +139,7 @@ class XenonDevice(object):
     def __init__(self, dev_id, address, local_key=None, dev_type=None, connection_timeout=10):
         """
         Represents a Tuya device.
-
+        
         Args:
             dev_id (str): The device id.
             address (str): The network address.
@@ -137,7 +147,7 @@ class XenonDevice(object):
             dev_type (str, optional): The device type.
                 It will be used as key for lookups in payload_dict.
                 Defaults to None.
-
+            
         Attributes:
             port (int): The port to connect to.
         """
@@ -147,6 +157,7 @@ class XenonDevice(object):
         self.local_key = local_key.encode('latin1')
         self.dev_type = dev_type
         self.connection_timeout = connection_timeout
+        self.version = 3.1
 
         self.port = 6668  # default - do not expect caller to pass in
 
@@ -156,17 +167,21 @@ class XenonDevice(object):
     def _send_receive(self, payload):
         """
         Send single buffer `payload` and receive a single buffer.
-
+        
         Args:
             payload(bytes): Data to send.
         """
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         s.settimeout(self.connection_timeout)
         s.connect((self.address, self.port))
         s.send(payload)
         data = s.recv(1024)
         s.close()
         return data
+
+    def set_version(self, version):
+        self.version = version
 
     def generate_payload(self, command, data=None):
         """
@@ -199,13 +214,20 @@ class XenonDevice(object):
         json_payload = json_payload.encode('utf-8')
         log.debug('json_payload=%r', json_payload)
 
-        if command == SET:
+        if self.version == 3.3:
+            self.cipher = AESCipher(self.local_key)  # expect to connect and then disconnect to set new
+            json_payload = self.cipher.encrypt(json_payload, False)
+            self.cipher = None
+            if command != STATUS:
+                # add the 3.3 header
+                json_payload = PROTOCOL_VERSION_BYTES_33 + b"\0\0\0\0\0\0\0\0\0\0\0\0" + json_payload
+        elif command == SET:
             # need to encrypt
             #print('json_payload %r' % json_payload)
             self.cipher = AESCipher(self.local_key)  # expect to connect and then disconnect to set new
             json_payload = self.cipher.encrypt(json_payload)
             #print('crypted json_payload %r' % json_payload)
-            preMd5String = b'data=' + json_payload + b'||lpv=' + PROTOCOL_VERSION_BYTES + b'||' + self.local_key
+            preMd5String = b'data=' + json_payload + b'||lpv=' + PROTOCOL_VERSION_BYTES_31 + b'||' + self.local_key
             #print('preMd5String %r' % preMd5String)
             m = md5()
             m.update(preMd5String)
@@ -213,7 +235,7 @@ class XenonDevice(object):
             hexdigest = m.hexdigest()
             #print(hexdigest)
             #print(hexdigest[8:][:16])
-            json_payload = PROTOCOL_VERSION_BYTES + hexdigest[8:][:16].encode('latin1') + json_payload
+            json_payload = PROTOCOL_VERSION_BYTES_31 + hexdigest[8:][:16].encode('latin1') + json_payload
             #print('data_to_send')
             #print(json_payload)
             #print('crypted json_payload (%d) %r' % (len(json_payload), json_payload))
@@ -230,25 +252,27 @@ class XenonDevice(object):
         #print('postfix_payload %r' % hex(len(postfix_payload)))
         assert len(postfix_payload) <= 0xff
         postfix_payload_hex_len = '%x' % len(postfix_payload)  # TODO this assumes a single byte 0-255 (0x00-0xff)
-        buffer = hex2bin( payload_dict[self.dev_type]['prefix'] +
-                          payload_dict[self.dev_type][command]['hexByte'] +
+        buffer = hex2bin( payload_dict[self.dev_type]['prefix'] + 
+                          payload_dict[self.dev_type][command]['hexByte'] + 
                           '000000' +
                           postfix_payload_hex_len ) + postfix_payload
+
+        # calc the CRC of everything except where the CRC goes and the suffix
+        hex_crc = format(binascii.crc32(buffer[:-8]) & 0xffffffff, '08X')
+        buffer = buffer[:-8] + hex2bin(hex_crc) + buffer[-4:]
         #print('command', command)
         #print('prefix')
         #print(payload_dict[self.dev_type][command]['prefix'])
         #print(repr(buffer))
         #print(bin2hex(buffer, pretty=True))
         #print(bin2hex(buffer, pretty=False))
-        #print('full buffer(%d) %r' % (len(buffer), buffer))
+        #print('full buffer(%d) %r' % (len(buffer), " ".join("{:02x}".format(ord(c)) for c in buffer)))
         return buffer
-
-
-class OutletDevice(XenonDevice):
+    
+class Device(XenonDevice):
     def __init__(self, dev_id, address, local_key=None, dev_type=None):
-        dev_type = dev_type or 'outlet'
-        super(OutletDevice, self).__init__(dev_id, address, local_key, dev_type)
-
+        super(Device, self).__init__(dev_id, address, local_key, dev_type)
+    
     def status(self):
         log.debug('status() entry')
         # open device, send request, then close connection
@@ -263,17 +287,28 @@ class OutletDevice(XenonDevice):
         #print('result %r' % result)
         if result.startswith(b'{'):
             # this is the regular expected code path
-            result = json.loads(result.decode())
-        elif result.startswith(PROTOCOL_VERSION_BYTES):
+            if not isinstance(result, str):
+                result = result.decode()
+            result = json.loads(result)
+        elif result.startswith(PROTOCOL_VERSION_BYTES_31):
             # got an encrypted payload, happens occasionally
             # expect resulting json to look similar to:: {"devId":"ID","dps":{"1":true,"2":0},"t":EPOCH_SECS,"s":3_DIGIT_NUM}
             # NOTE dps.2 may or may not be present
-            result = result[len(PROTOCOL_VERSION_BYTES):]  # remove version header
+            result = result[len(PROTOCOL_VERSION_BYTES_31):]  # remove version header
             result = result[16:]  # remove (what I'm guessing, but not confirmed is) 16-bytes of MD5 hexdigest of payload
             cipher = AESCipher(self.local_key)
             result = cipher.decrypt(result)
             log.debug('decrypted result=%r', result)
-            result = json.loads(result.decode())
+            if not isinstance(result, str):
+                result = result.decode()
+            result = json.loads(result)
+        elif self.version == 3.3: 
+            cipher = AESCipher(self.local_key)
+            result = cipher.decrypt(result, False)
+            log.debug('decrypted result=%r', result)
+            if not isinstance(result, str):
+                result = result.decode()
+            result = json.loads(result)
         else:
             log.error('Unexpected status() payload=%r', result)
 
@@ -282,7 +317,7 @@ class OutletDevice(XenonDevice):
     def set_status(self, on, switch=1):
         """
         Set status of the device to 'on' or 'off'.
-
+        
         Args:
             on(bool):  True for 'on', False for 'off'.
             switch(int): The switch to set
@@ -297,11 +332,38 @@ class OutletDevice(XenonDevice):
         log.debug('set_status received data=%r', data)
 
         return data
+    
+    def set_value(self, index, value):
+        """
+        Set int value of any index.
+
+        Args:
+            index(int): index to set
+            value(int): new value for the index
+        """
+        # open device, send request, then close connection
+        if isinstance(index, int):
+            index = str(index)  # index and payload is a string
+
+        payload = self.generate_payload(SET, {
+            index: value})
+        
+        data = self._send_receive(payload)
+        
+        return data
+    
+    def turn_on(self, switch=1):
+        """Turn the device on"""
+        self.set_status(True, switch)
+
+    def turn_off(self, switch=1):
+        """Turn the device off"""
+        self.set_status(False, switch)
 
     def set_timer(self, num_secs):
         """
         Set a timer.
-
+        
         Args:
             num_secs(int): Number of seconds
         """
@@ -320,3 +382,203 @@ class OutletDevice(XenonDevice):
         log.debug('set_timer received data=%r', data)
         return data
 
+class OutletDevice(Device):
+    def __init__(self, dev_id, address, local_key=None):
+        dev_type = 'device'
+        super(OutletDevice, self).__init__(dev_id, address, local_key, dev_type)
+
+class BulbDevice(Device):
+    DPS_INDEX_ON         = '1'
+    DPS_INDEX_MODE       = '2'
+    DPS_INDEX_BRIGHTNESS = '3'
+    DPS_INDEX_COLOURTEMP = '4'
+    DPS_INDEX_COLOUR     = '5'
+
+    DPS             = 'dps'
+    DPS_MODE_COLOUR = 'colour'
+    DPS_MODE_WHITE  = 'white'
+    
+    DPS_2_STATE = {
+                '1':'is_on',
+                '2':'mode',
+                '3':'brightness',
+                '4':'colourtemp',
+                '5':'colour',
+                }
+
+    def __init__(self, dev_id, address, local_key=None):
+        dev_type = 'device'
+        super(BulbDevice, self).__init__(dev_id, address, local_key, dev_type)
+
+    @staticmethod
+    def _rgb_to_hexvalue(r, g, b):
+        """
+        Convert an RGB value to the hex representation expected by tuya.
+        
+        Index '5' (DPS_INDEX_COLOUR) is assumed to be in the format:
+        rrggbb0hhhssvv
+        
+        While r, g and b are just hexadecimal values of the corresponding
+        Red, Green and Blue values, the h, s and v values (which are values
+        between 0 and 1) are scaled to 360 (h) and 255 (s and v) respectively.
+        
+        Args:
+            r(int): Value for the colour red as int from 0-255.
+            g(int): Value for the colour green as int from 0-255.
+            b(int): Value for the colour blue as int from 0-255.
+        """
+        rgb = [r,g,b]
+        hsv = colorsys.rgb_to_hsv(rgb[0]/255, rgb[1]/255, rgb[2]/255)
+
+        hexvalue = ""
+        for value in rgb:
+            temp = str(hex(int(value))).replace("0x","")
+            if len(temp) == 1:
+                temp = "0" + temp
+            hexvalue = hexvalue + temp
+
+        hsvarray = [int(hsv[0] * 360), int(hsv[1] * 255), int(hsv[2] * 255)]
+        hexvalue_hsv = ""
+        for value in hsvarray:
+            temp = str(hex(int(value))).replace("0x","")
+            if len(temp) == 1:
+                temp = "0" + temp
+            hexvalue_hsv = hexvalue_hsv + temp
+        if len(hexvalue_hsv) == 7:
+            hexvalue = hexvalue + "0" + hexvalue_hsv
+        else:
+            hexvalue = hexvalue + "00" + hexvalue_hsv
+
+        return hexvalue
+
+    @staticmethod
+    def _hexvalue_to_rgb(hexvalue):
+        """
+        Converts the hexvalue used by tuya for colour representation into
+        an RGB value.
+        
+        Args:
+            hexvalue(string): The hex representation generated by BulbDevice._rgb_to_hexvalue()
+        """
+        r = int(hexvalue[0:2], 16)
+        g = int(hexvalue[2:4], 16)
+        b = int(hexvalue[4:6], 16)
+
+        return (r, g, b)
+
+    @staticmethod
+    def _hexvalue_to_hsv(hexvalue):
+        """
+        Converts the hexvalue used by tuya for colour representation into
+        an HSV value.
+        
+        Args:
+            hexvalue(string): The hex representation generated by BulbDevice._rgb_to_hexvalue()
+        """
+        h = int(hexvalue[7:10], 16) / 360
+        s = int(hexvalue[10:12], 16) / 255
+        v = int(hexvalue[12:14], 16) / 255
+
+        return (h, s, v)
+
+    def set_colour(self, r, g, b):
+        """
+        Set colour of an rgb bulb.
+
+        Args:
+            r(int): Value for the colour red as int from 0-255.
+            g(int): Value for the colour green as int from 0-255.
+            b(int): Value for the colour blue as int from 0-255.
+        """
+        if not 0 <= r <= 255:
+            raise ValueError("The value for red needs to be between 0 and 255.")
+        if not 0 <= g <= 255:
+            raise ValueError("The value for green needs to be between 0 and 255.")
+        if not 0 <= b <= 255:
+            raise ValueError("The value for blue needs to be between 0 and 255.")
+
+        #print(BulbDevice)
+        hexvalue = BulbDevice._rgb_to_hexvalue(r, g, b)
+
+        payload = self.generate_payload(SET, {
+            self.DPS_INDEX_MODE: self.DPS_MODE_COLOUR,
+            self.DPS_INDEX_COLOUR: hexvalue})
+        data = self._send_receive(payload)
+        return data
+
+    def set_white(self, brightness, colourtemp):
+        """
+        Set white coloured theme of an rgb bulb.
+
+        Args:
+            brightness(int): Value for the brightness (25-255).
+            colourtemp(int): Value for the colour temperature (0-255).
+        """
+        if not 25 <= brightness <= 255:
+            raise ValueError("The brightness needs to be between 25 and 255.")
+        if not 0 <= colourtemp <= 255:
+            raise ValueError("The colour temperature needs to be between 0 and 255.")
+
+        payload = self.generate_payload(SET, {
+            self.DPS_INDEX_MODE: self.DPS_MODE_WHITE,
+            self.DPS_INDEX_BRIGHTNESS: brightness,
+            self.DPS_INDEX_COLOURTEMP: colourtemp})
+
+        data = self._send_receive(payload)
+        return data
+
+    def set_brightness(self, brightness):
+        """
+        Set the brightness value of an rgb bulb.
+
+        Args:
+            brightness(int): Value for the brightness (25-255).
+        """
+        if not 25 <= brightness <= 255:
+            raise ValueError("The brightness needs to be between 25 and 255.")
+
+        payload = self.generate_payload(SET, {self.DPS_INDEX_BRIGHTNESS: brightness})
+        data = self._send_receive(payload)
+        return data
+
+    def set_colourtemp(self, colourtemp):
+        """
+        Set the colour temperature of an rgb bulb.
+
+        Args:
+            colourtemp(int): Value for the colour temperature (0-255).
+        """
+        if not 0 <= colourtemp <= 255:
+            raise ValueError("The colour temperature needs to be between 0 and 255.")
+
+        payload = self.generate_payload(SET, {self.DPS_INDEX_COLOURTEMP: colourtemp})
+        data = self._send_receive(payload)
+        return data
+
+    def brightness(self):
+        """Return brightness value"""
+        return self.status()[self.DPS][self.DPS_INDEX_BRIGHTNESS]
+
+    def colourtemp(self):
+        """Return colour temperature"""
+        return self.status()[self.DPS][self.DPS_INDEX_COLOURTEMP]
+
+    def colour_rgb(self):
+        """Return colour as RGB value"""
+        hexvalue = self.status()[self.DPS][self.DPS_INDEX_COLOUR]
+        return BulbDevice._hexvalue_to_rgb(hexvalue)
+
+    def colour_hsv(self):
+        """Return colour as HSV value"""
+        hexvalue = self.status()[self.DPS][self.DPS_INDEX_COLOUR]
+        return BulbDevice._hexvalue_to_hsv(hexvalue)
+
+    def state(self):
+        status = self.status()
+        state = {}
+
+        for key in status[self.DPS].keys():
+            if(int(key)<=5):
+                state[self.DPS_2_STATE[key]]=status[self.DPS][key]
+
+        return state

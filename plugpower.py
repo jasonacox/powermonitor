@@ -10,18 +10,20 @@ import os
 # Device Info - EDIT THIS
 DEVICEID="01234567891234567890"
 DEVICEIP="10.1.1.1"
+DEVICEKEY="0123456789abcdef"
 
 PLUGID=os.getenv('PLUGID', DEVICEID)
 PLUGIP=os.getenv('PLUGIP', DEVICEIP)
+PLUGKEY=os.getenv('PLUGKEY', DEVICEKEY)
 
 # how my times to try to probe plug before giving up
 RETRY=5
 
-def deviceInfo( deviceid, ip ):
+def deviceInfo( deviceid, ip, key ):
     watchdog = 0
     while True:
         try:
-            d = pytuya.OutletDevice(deviceid, ip, '0123456789abcdef')
+            d = pytuya.OutletDevice(deviceid, ip, key)
             data = d.status()
             if(d):
                 print('Dictionary %r' % data)
@@ -52,8 +54,9 @@ def deviceInfo( deviceid, ip ):
                 return(0.0)
             sleep(2)
 
-print("Polling Device %s at %s" % (PLUGID,PLUGIP))
 
-devicepower = deviceInfo(PLUGID,PLUGIP)
+print("Polling Device %s at %s with key %s" % (PLUGID,PLUGIP,PLUGKEY))
+
+devicepower = deviceInfo(PLUGID,PLUGIP,PLUGKEY)
 
 
