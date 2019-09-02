@@ -3,7 +3,7 @@ Monitor power usage through WiFi Smart Plug
 
 This script will will poll [Tuya](https://en.tuya.com/) campatible Smart Plugs for state (on/off), current (mA), voltage (V), and power (wattage).  
 
-This project is based on the python based pytuya library to poll Smart Plugs for state and power data that can be used for point in time monitoring or stored for trending.  There are two scripts here. The `powerplug.py` script responds with a human redable output of state (on/off), current (mA), voltage (V), and power (W).  The `powerjson.py` script responds with JSON containing the same but adds a timestamp for convient time series processing.
+This project is based on the python pytuya library to poll Smart Plugs for state and power data that can be used for point in time monitoring or stored for trending.  There are two scripts here. The `powerplug.py` script responds with a human redable output of state (on/off), current (mA), voltage (V), and power (W).  The `powerjson.py` script responds with JSON containing the same but adds a timestamp for convient time series processing.
 
 REQUIRED: IP address and Device ID of  smart plug.
 
