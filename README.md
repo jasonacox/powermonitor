@@ -1,11 +1,11 @@
-# powermonitor
+# PowerMonitor
 Monitor power usage through WiFi Smart Plug
 
-This script will will poll the Smart Plugs for state and energy usage (Watts)
+This script will will poll [Tuya](https://en.tuya.com/) campatible Smart Plugs for state (on/off), current (mA), voltage (V), and power (wattage).  
 
-Instructions for Capatible Smart Plugs
+This project is based on the python based pytuya library to poll Smart Plugs for state and power data that can be used for point in time monitoring or stored for trending.  There are two scripts here. The `powerplug.py` script responds with a human redable output of state (on/off), current (mA), voltage (V), and power (W).  The `powerjson.py` script responds with JSON containing the same but adds a timestamp for convient time series processing.
 
-To monitor a smart plug, you will need to know its IP address and Device ID.
+REQUIRED: IP address and Device ID of  smart plug.
 
 ## Setup
 1. Download the Smart Life - Smart Living app for iPhone or Android. Pair with your smart plug (this is important as you cannot monitor a plug that has not been paired).  
@@ -81,3 +81,7 @@ Projected usage (kWh):  Day: 0.031200  Week: 0.218400  Month: 0.946400
 * TanTan Smart Plug Mini Wi-Fi Enabled Outlet with Energy Monitoring - https://www.amazon.com/gp/product/B075Z17987/ref=oh_aui_detailpage_o03_s00?ie=UTF8&psc=1
 * SKYROKU SM-PW701U Wi-Fi Plug Smart Plug - see https://wikidevi.com/wiki/Xenon_SM-PW701U
 * Wuudi SM-S0301-US - WIFI Smart Power Socket Multi Plug with 4 AC Outlets and 4 USB Charging
+
+## Acknowledgements
+
+* https://github.com/clach04/python-tuya
