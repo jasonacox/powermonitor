@@ -35,18 +35,27 @@ docker build -t powermonitor .
 docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="0123456789abcdef" powermonitor
 ```
 
-**OPTION 2**: Manually install required python libraries:  
+**OPTION 2**: Run Manually:  
 
-* Edit `plugpower.py` and add your Device ID and IP Address.
+The script does not need docker but it does require the pycrypto python library. Follow these steps to set it up and run the `plugpower.py` script:
+
+1. Edit `plugpower.py` and add your Device ID and IP Address.  Alternatively, you can use envrionment variables instead (see `test.sh`).
+2. Install pip and python libraries if you haven't already:
 
 ```
-# RaspberryPi 
+# Tested on RaspberryPi 
 
-sudo apt-get install python-crypto python-pip
-pip install pycrypto
-pip install Crypto
-pip install pyaes
+ sudo apt-get install python-crypto python-pip		
+ pip install pycrypto
+ pip install Crypto		# some systems will need this
+ pip install pyaes		# some systems will need this
 ```
+3. Run the python script:
+```
+ python plugpower.py
+
+```
+
 ## JSON Output Script
 The `plugjson.py` script works the same as `plugpower.py` but produces the data in JSON output with a datetime stamp.  This makes it easier to feed into other systems for recording, alerting or graphing.
 
