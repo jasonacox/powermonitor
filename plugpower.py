@@ -6,42 +6,65 @@ import pytuya
 from time import sleep
 import datetime
 import os
+import sys
 
 # Device Info - EDIT THIS
-DEVICEID="01234567891234567890"
-DEVICEIP="10.1.1.1"
-DEVICEKEY="0123456789abcdef"
+DEVICEID=sys.argv[1]
+DEVICEIP=sys.argv[2]
+DEVICEKEY=sys.argv[3]
+DEVICEVERS=sys.argv[4] if len(sys.argv) >= 5 else '3.1'
 
 PLUGID=os.getenv('PLUGID', DEVICEID)
 PLUGIP=os.getenv('PLUGIP', DEVICEIP)
 PLUGKEY=os.getenv('PLUGKEY', DEVICEKEY)
+PLUGVERS=os.getenv('PLUGVERS', DEVICEVERS)
 
 # how my times to try to probe plug before giving up
 RETRY=5
 
-def deviceInfo( deviceid, ip, key ):
+def deviceInfo( deviceid, ip, key, vers ):
     watchdog = 0
     while True:
         try:
             d = pytuya.OutletDevice(deviceid, ip, key)
+            if vers == '3.3':
+                d.set_version(3.3)
+
             data = d.status()
             if(d):
                 print('Dictionary %r' % data)
                 print('Switch On: %r' % data['dps']['1'])
-                if '5' in data['dps'].keys():
-                    w = (float(data['dps']['5'])/10.0)
-                    mA = float(data['dps']['4'])
-                    V = (float(data['dps']['6'])/10.0)
-                    day = (w/1000.0)*24
-                    week = 7.0 * day
-                    month = (week * 52.0)/12.0
-                    print('Power (W): %f' % w)
-                    print('Current (mA): %f' % mA)
-                    print('Voltage (V): %f' % V)
-                    print('Projected usage (kWh):  Day: %f  Week: %f  Month: %f' % (day, week, month))
-                    return(float(data['dps']['5'])/10.0)
+
+                if vers == '3.3':
+                    if '19' in data['dps'].keys():
+                        w = (float(data['dps']['19'])/10.0)
+                        mA = float(data['dps']['18'])
+                        V = (float(data['dps']['20'])/10.0)
+                        day = (w/1000.0)*24
+                        week = 7.0 * day
+                        month = (week * 52.0)/12.0
+                        print('Power (W): %f' % w)
+                        print('Current (mA): %f' % mA)
+                        print('Voltage (V): %f' % V)
+                        print('Projected usage (kWh):  Day: %f  Week: %f  Month: %f' % (day, week, month))
+                        return(float(data['dps']['5'])/10.0)
+                    else:
+                        return(0.0)
                 else:
-                    return(0.0)
+                    if '5' in data['dps'].keys():
+                        w = (float(data['dps']['5'])/10.0)
+                        mA = float(data['dps']['4'])
+                        V = (float(data['dps']['6'])/10.0)
+                        day = (w/1000.0)*24
+                        week = 7.0 * day
+                        month = (week * 52.0)/12.0
+                        print('Power (W): %f' % w)
+                        print('Current (mA): %f' % mA)
+                        print('Voltage (V): %f' % V)
+                        print('Projected usage (kWh):  Day: %f  Week: %f  Month: %f' % (day, week, month))
+                        return(float(data['dps']['5'])/10.0)
+                    else:
+                        return(0.0)
             else:
                 return(0.0)
             break
@@ -55,8 +78,8 @@ def deviceInfo( deviceid, ip, key ):
             sleep(2)
 
 
-print("Polling Device %s at %s with key %s" % (PLUGID,PLUGIP,PLUGKEY))
+print("Polling Device %s at %s with key %s and protocol version %s" % (PLUGID,PLUGIP,PLUGKEY,PLUGVERS))
 
-devicepower = deviceInfo(PLUGID,PLUGIP,PLUGKEY)
+devicepower = deviceInfo(PLUGID,PLUGIP,PLUGKEY,PLUGVERS)
 
 
