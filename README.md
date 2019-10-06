@@ -12,9 +12,9 @@ REQUIRED: IP address and Device ID of  smart plug.
 	* https://itunes.apple.com/us/app/smart-life-smart-living/id1115101477?mt=8
 	* https://play.google.com/store/apps/details?id=com.tuya.smartlife&hl=en
 2. Device ID - Inside the app, select the plug you wish to monitor, select the 3 dots(Jinvoo) or the edit/pencil icon(Tuya & SmartLife) in the top right and then "Device Info".  The page should display "Device ID" which the script will use to poll the plug. It's also worth noting the MAC address of the device as it can come in handy in step 3.
-3. IP Address - If your router displays a list of all the devices that are connected to it, you can search for MAC address of the device. This is often the quickest way to locate your device IP.
+3. IP Address - If your router displays a list of all the devices that are connected to it, you can search for the MAC address of the device. This is often the quickest way to locate your device IP.
 
-Alternatively, you will need to manually determine what IP address your network assigned to the Smart Plug - this is more difficult but it looks like `arp-scan` can help identify devices on your network.  WiFi Routers often have a list of devices connected as well. Look for devices with a name like "ESP_xxxxxx". Many modern routers allow you to set the hostname of connected devices to something more memorable, once you have located it.
+	Alternatively, you will need to manually determine what IP address your network assigned to the Smart Plug - this is more difficult but it looks like `arp-scan` can help identify devices on your network.  WiFi Routers often have a list of devices connected as well. Look for devices with a name like "ESP_xxxxxx". Many modern routers allow you to set the hostname of connected devices to something more memorable, once you have located it.
 
 4. Firmware Version - Devices with newer firmware (1.0.5 and above) are typically using a different protocol. These devices need to be communicated with using encryption and the resultant data is packaged slightly differently. It's a good idea therefore to check the Firmware version of the device(s) too. Again in the Tuya/SmartLife/Jinvoo app there will be a device option "Check for Firmware Upgrade" or similar. Open this option and take note of the Wi-Fi Module & MCU Module numbers. These are usually the same.
 
@@ -51,6 +51,11 @@ The script does not need docker but it does require the pycrypto python library.
 ```
 
 2. Run the python script:
+```
+ #Devices with older firmware (1.0.4 and below)
+ python plugpower.py {DEVICEID} {DEVICEIP} {DEVICEKEY} {DEVICEVERS [optional]}
+```
+eg:
 ```
  #Devices with older firmware (1.0.4 and below)
  python plugpower.py 01234567890 10.0.1.99 0123456789abcdef
