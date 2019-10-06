@@ -1,4 +1,4 @@
-# PowerMonitor
+# PowerMonitor -(Tuya Power Stats)
 Monitor power usage through WiFi Smart Plug
 
 This script will will poll [Tuya](https://en.tuya.com/) campatible Smart Plugs for state (on/off), current (mA), voltage (V), and power (wattage).  
