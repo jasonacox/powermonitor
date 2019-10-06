@@ -37,7 +37,7 @@ docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="012
 docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="0123456789abcdef" -e PLUGINVERS="3.3" -e powermonitor
 ```
 
-## Setup: Option 1 - Manually (Tested on RaspberryPi):  
+## Setup: Option 2 - Manually (Tested on RaspberryPi):  
 
 The script does not need docker but it does require the pycrypto python library. Follow these steps to set it up and run the script:
 
