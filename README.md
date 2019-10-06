@@ -109,5 +109,7 @@ Please note, these smart plugs and this script do not hold power usage data in m
 
 
 ## Acknowledgements
-
 * https://github.com/clach04/python-tuya
+
+## Contributers
+* Phill Healey ([codeclinic](https://github.com/codeclinic)) - Integration for firmwares (1.0.5+) / protocol v3.3 & commandline arguments.
