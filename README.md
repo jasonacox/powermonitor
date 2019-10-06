@@ -62,7 +62,7 @@ eg:
 ```
 
 ```
- #Devices with older firmware (1.0.4 and below)
+ #Devices with newer firmware (1.0.5 and above)
  python plugpower.py 01234567890 10.0.1.99 0123456789abcdef 3.3
 ```
 
