@@ -1,7 +1,9 @@
 #!/bin/bash
-export PLUGID='01234567891234567890' 
-export PLUGIP="10.1.1.1" 
-export PLUGKEY="0123456789abcdef"
+export PLUGID=$0 
+export PLUGIP=$1
+export PLUGKEY=$2
+export PLUGVERS=${3:-'3.1'}
+
 echo "JSON Output - plugjson.py:"
 ./plugjson.py
 echo

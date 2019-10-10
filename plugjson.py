@@ -7,39 +7,56 @@ from time import sleep
 import datetime
 import time
 import os
-
+import sys
 
 # Device Info - EDIT THIS
-DEVICEID="01234567891234567890"
-DEVICEIP="10.1.1.1"
-DEVICEKEY="0123456789abcdef"
+DEVICEID=sys.argv[1]
+DEVICEIP=sys.argv[2]
+DEVICEKEY=sys.argv[3]
+DEVICEVERS=sys.argv[4] if len(sys.argv) >= 5 else '3.1'
 
 PLUGID=os.getenv('PLUGID', DEVICEID)
 PLUGIP=os.getenv('PLUGIP', DEVICEIP)
 PLUGKEY=os.getenv('PLUGKEY', DEVICEKEY)
+PLUGVERS=os.getenv('PLUGVERS', DEVICEVERS)
 
 # how my times to try to probe plug before giving up
 RETRY=5
 
-def deviceInfo( deviceid, ip, key ):
+def deviceInfo( deviceid, ip, key, vers ):
     watchdog = 0
     now = datetime.datetime.utcnow()
     iso_time = now.strftime("%Y-%m-%dT%H:%M:%SZ") 
     while True:
         try:
             d = pytuya.OutletDevice(deviceid, ip, key)
+            if vers == '3.3':
+                d.set_version(3.3)
+
             data = d.status()
             if(d):
                 sw =data['dps']['1']
-                if '5' in data['dps'].keys():
-                    w = (float(data['dps']['5'])/10.0)
-                    mA = float(data['dps']['4'])
-                    V = (float(data['dps']['6'])/10.0)
-                    ret = "{ \"datetime\": \"%s\", \"switch\": \"%s\", \"power\": \"%s\", \"current\": \"%s\", \"voltage\": \"%s\" }" % (iso_time, sw, w, mA, V)
-                    return(ret)
+
+                if vers == '3.3':
+                    if '19' in data['dps'].keys():
+                        w = (float(data['dps']['19'])/10.0)
+                        mA = float(data['dps']['18'])
+                        V = (float(data['dps']['20'])/10.0)
+                        ret = "{ \"datetime\": \"%s\", \"switch\": \"%s\", \"power\": \"%s\", \"current\": \"%s\", \"voltage\": \"%s\" }" % (iso_time, sw, w, mA, V)
+                        return(ret)
+                    else:
+                        ret = "{ \"switch\": \"%s\" }" % sw
+                        return(ret)
                 else:
-                    ret = "{ \"switch\": \"%s\" }" % sw
-                    return(ret)
+                    if '5' in data['dps'].keys():
+                        w = (float(data['dps']['5'])/10.0)
+                        mA = float(data['dps']['4'])
+                        V = (float(data['dps']['6'])/10.0)
+                        ret = "{ \"datetime\": \"%s\", \"switch\": \"%s\", \"power\": \"%s\", \"current\": \"%s\", \"voltage\": \"%s\" }" % (iso_time, sw, w, mA, V)
+                        return(ret)
+                    else:
+                        ret = "{ \"switch\": \"%s\" }" % sw
+                        return(ret)
             else:
                 ret = "{\"result\": \"Incomplete response from plug %s [%s].\"}" % (deviceid,ip)
                 return(ret)
@@ -53,8 +70,7 @@ def deviceInfo( deviceid, ip, key ):
                 return(ret)
             sleep(2)
 
-
-responsejson = deviceInfo(PLUGID,PLUGIP,PLUGKEY)
+responsejson = deviceInfo(PLUGID,PLUGIP,PLUGKEY,PLUGVERS)
 print(responsejson)
 
 
