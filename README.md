@@ -30,11 +30,11 @@ docker build -t powermonitor .
 
 # Devices with older firmware (1.0.4 and below)
 # run powermonitor container - replace with device ID and IP 
-docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="0123456789abcdef" -e PLUGVERS=" " -e powermonitor
+docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="0123456789abcdef" powermonitor
 
 # Devices with newer firmware (1.0.5 and above)
 # run powermonitor container - replace with device ID and IP 
-docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="0123456789abcdef" -e PLUGINVERS="3.3" -e powermonitor
+docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="0123456789abcdef" -e PLUGINVERS="3.3"  powermonitor
 ```
 
 ## Setup: Option 2 - Manually (Tested on RaspberryPi):  
@@ -53,7 +53,7 @@ The script does not need docker but it does require the pycrypto python library.
 2. Run the python script:
 ```
  #Devices with older firmware (1.0.4 and below)
- python plugpower.py {DEVICEID} {DEVICEIP} {DEVICEKEY} {DEVICEVERS [optional]}
+ python plugpower.py {DEVICEID} {DEVICEIP} {DEVICEKEY [optional]} {DEVICEVERS [optional]}
 ```
 eg:
 ```
@@ -72,7 +72,7 @@ The `plugjson.py` script works the same as `plugpower.py` but produces the data 
 ## Example Output
 ### Docker
 ```
-$ docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.99" -e PLUGKEY="0123456789abcdef" -e PLUGINVERS=" " -e jasonacox/powermonitor
+$ docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.99" -e PLUGKEY="0123456789abcdef" jasonacox/powermonitor
 
 Polling Device 01234567891234567890 at 10.0.1.99 with key 0123456789abcde1
 Dictionary {'devId': '01234567891234567890', 'dps': {'1': True, '2': 0, '4': 69, '5': 12, '6': 1181}}
