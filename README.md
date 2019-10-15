@@ -1,7 +1,7 @@
 # PowerMonitor (Tuya Power Stats)
 Monitor power usage through WiFi Smart Plug
 
-**NOTICE**: This project has been replaced by a PyPi module, [tuyapower](https://github.com/jasonacox/tuyapower), to simply adding this capability to your python projects.
+**NOTICE**: This project has been replaced by a PyPi module, [tuyapower](https://github.com/jasonacox/tuyapower), to simplify adding this capability to your python projects.
 
 This script will will poll [Tuya](https://en.tuya.com/) campatible Smart Plugs for state (on/off), current (mA), voltage (V), and power (wattage).  
 
