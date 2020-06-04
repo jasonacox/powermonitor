@@ -59,7 +59,7 @@ def deviceInfo( deviceid, ip, key, vers ):
                         print('Current (mA): %f' % mA)
                         print('Voltage (V): %f' % V)
                         print('Projected usage (kWh):  Day: %f  Week: %f  Month: %f' % (day, week, month))
-                        return(float(data['dps']['5'])/10.0)
+                        return(float(data['dps']['19'])/10.0)
                     else:
                         return(0.0)
                 else:
@@ -82,13 +82,12 @@ def deviceInfo( deviceid, ip, key, vers ):
             break
         except KeyboardInterrupt:
             pass
-        except:
+        except OSError as o:
             watchdog+=1
             if(watchdog>RETRY):
-                print("ERROR: No response from plug %s [%s]." % (deviceid,ip))
+                print("OSERROR: No response from plug %s [%s] %s." % (deviceid,ip, o.strerror))
                 return(0.0)
             sleep(2)
-
 
 print("Polling Device %s at %s with key %s and protocol version %s" % (PLUGID,PLUGIP,PLUGKEY,PLUGVERS))
 
