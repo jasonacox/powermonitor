@@ -3,6 +3,7 @@ Monitor power usage through WiFi Smart Plug
 
 **NOTICE**: This project has been replaced by a PyPi module, [tuyapower](https://github.com/jasonacox/tuyapower), to simplify adding this capability to your python projects.
 
+## Description
 This script will will poll [Tuya](https://en.tuya.com/) campatible Smart Plugs for state (on/off), current (mA), voltage (V), and power (wattage).  
 
 This project is based on the python pytuya library to poll [Tuya](https://en.tuya.com/) campatible Smart Plugs for state and power data that can be used for point in time monitoring or stored for trending.  There are two scripts here. The `powerplug.py` script responds with a human redable output of state (on/off), current (mA), voltage (V), and power (W).  The `powerjson.py` script responds with JSON containing the same but adds a timestamp for convient time series processing.
@@ -47,7 +48,7 @@ The script does not need docker but it does require the pytuya and pycrypto pyth
 
 ```
  sudo apt-get install python-crypto python-pip		
- pip install pycrypto
+ pip install pycrypto	# or pycryptodome
  pip install pytuya
  pip install Crypto		# some systems will need this
  pip install pyaes		# some systems will need this
