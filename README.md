@@ -21,7 +21,7 @@ REQUIRED: IP address and Device ID of  smart plug.
 
 4. Firmware Version - Devices with newer firmware (1.0.5 and above) are typically using a different protocol. These devices need to be communicated with using encryption and the resultant data is packaged slightly differently. It's a good idea therefore to check the Firmware version of the device(s) too. Again in the Tuya/SmartLife/Jinvoo app there will be a device option "Check for Firmware Upgrade" or similar. Open this option and take note of the Wi-Fi Module & MCU Module numbers. These are usually the same.
 
-5. Device Key - If your device is running Firmware 1.0.5 or above, you will need to obtain the Device Key. This is used to connect with the device decrypt the power consumption data. For details on how to do this, see point 2 here https://github.com/clach04/python-tuya/wiki or follow these instructions: <https://github.com/jasonacox/tuyapower#get-the-tuya-device-key>
+5. Device Key - If your device is running Firmware 1.0.5 or above, you will need to obtain the Device Key. This is used to connect with the device decrypt the power consumption data. For details on how to do this, see point 2 here https://github.com/clach04/python-tuya/wiki or follow these instructions: <https://github.com/jasonacox/tuyapower#tuya-device-preparation>
 
 
 ## Setup: Option 1 - Docker
