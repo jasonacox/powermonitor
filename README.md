@@ -37,7 +37,7 @@ docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="012
 
 # Devices with newer firmware (1.0.5 and above)
 # run powermonitor container - replace with device ID and IP 
-docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="0123456789abcdef" -e PLUGINVERS="3.3"  powermonitor
+docker run -e PLUGID='01234567891234567890' -e PLUGIP="10.0.1.x" -e PLUGKEY="0123456789abcdef" -e PLUGVERS="3.3"  powermonitor
 ```
 
 ## Setup: Option 2 - Manually (Tested on RaspberryPi):  
